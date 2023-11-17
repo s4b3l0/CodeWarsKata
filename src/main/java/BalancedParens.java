@@ -101,8 +101,8 @@ public class BalancedParens {
     }
 
     public static void main(String[] args) {
-        System.out.println(balancedParens(12).toString());
-        System.out.println(String.format("%-10s", "").replace(" ", "1"));
+        System.out.println(balancedParens(3).toString());
+        //System.out.println(String.format("%-10s", "").replace(" ", "1"));
     }
 
 }
