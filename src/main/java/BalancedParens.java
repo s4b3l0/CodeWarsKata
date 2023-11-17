@@ -1,9 +1,13 @@
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class BalancedParens {
+
+    private static int BUFFER = 100;
     private static boolean isBalanced(String str) {
         if (str.isBlank() || str.isEmpty()) return true;
         if (str.length() % 2 > 0) return false;
@@ -19,50 +23,58 @@ public class BalancedParens {
     public static List<String> balancedParens (int n) {
         // your code here
         //build balanced
-        List<String> counter = new ArrayList<>();
+        //List<String> counter = new ArrayList<>();
+        String[] countBuffer = new String[BUFFER];
+
         if (n == 0) {
-            counter.add("");
-            return counter;
+            var lst = new ArrayList<String>();
+            lst.add("");
+            return lst;
         }
         List<String> balanced = new ArrayList<>();
 
-        counter.add(String.format("%-"+ n * 2 + "s", "").replace(" ", "1"));
-        String track = counter.get(0);
+        //counter.add(String.format("%-"+ n * 2 + "s", "").replace(" ", "1"));
+        countBuffer[0] = String.format("%-"+ n * 2 + "s", "").replace(" ", "1");
+        String track = countBuffer[0];
+        int idx = 0;
         while (track.charAt(0) != '2') {
             //add
-            track = counter.get(counter.size() - 1);
+            track = countBuffer[idx];
 
             char[] arr = track.toCharArray();
             arr = generateNextCombination(arr);
-            counter.add(String.valueOf(arr));
-            track = counter.get(counter.size() - 1);
+            idx ++;
+            countBuffer[idx] = String.valueOf(arr);
+            track = countBuffer[idx];;
 
             //cleanup and continue
-            if (counter.size() == 1000) {
+            if (idx == BUFFER - 1) {
                 arr = generateNextCombination(arr);
                 track = String.valueOf(arr);
-                validate(counter, balanced);
-                counter.clear();
-                counter.add(track);
+                validate(countBuffer, balanced);
+                countBuffer = new String[BUFFER];
+                idx = 0;
+                countBuffer[idx] = track;
             }
+
         }
 
-        validate(counter, balanced);
+        validate(countBuffer, balanced);
 
         return balanced;
     }
 
-    private static void validate(List<String> counter, List<String> balanced) {
+    private static void validate(String[] counter, List<String> balanced) {
         final Predicate<String> predicate = (String v) -> {
-            return v.endsWith("2") && v.startsWith("1") && (v.length() / 2) == v.replace("1", "").length();
+            return !Objects.isNull(v) && v.endsWith("2") && v.startsWith("1") && (v.length() / 2) == v.replace("1", "").length();
         };
-        counter.stream().filter(predicate).forEach(val -> {
+        for ( String val: Arrays.asList(counter).stream().filter(predicate).collect(Collectors.toList())) {
             String v = val.replace('1', '(');
             v = v.replace('2', ')');
             if (isBalanced(v)) {
                 balanced.add(v);
             }
-        });
+        }
     }
 
     private static char[] generateNextCombination(char[] arr) {
